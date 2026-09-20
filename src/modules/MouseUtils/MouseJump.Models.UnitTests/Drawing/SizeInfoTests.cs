@@ -105,4 +105,34 @@ public static class SizeInfoTests
             Assert.AreEqual(expected, actual);
         }
     }
+
+    [TestClass]
+    public sealed class ScaleToFitRatioZeroSizeTests
+    {
+        [TestMethod]
+        public void ZeroSizedBoundsThrowsArgumentException()
+        {
+            var obj = new SizeInfo(1024, 768);
+
+            Assert.ThrowsExactly<ArgumentException>(
+                () => obj.ScaleToFitRatio(new SizeInfo(0, 768)));
+            Assert.ThrowsExactly<ArgumentException>(
+                () => obj.ScaleToFitRatio(new SizeInfo(1024, 0)));
+        }
+
+        [TestMethod]
+        public void ZeroSizedInstanceThrowsInvalidOperationException()
+        {
+            // the ratios divide by this instance, so a zero-sized instance used
+            // to raise DivideByZeroException instead of being rejected up front
+            var bounds = new SizeInfo(1024, 768);
+
+            Assert.ThrowsExactly<InvalidOperationException>(
+                () => new SizeInfo(0, 768).ScaleToFitRatio(bounds));
+            Assert.ThrowsExactly<InvalidOperationException>(
+                () => new SizeInfo(1024, 0).ScaleToFitRatio(bounds));
+            Assert.ThrowsExactly<InvalidOperationException>(
+                () => SizeInfo.Empty.ScaleToFitRatio(bounds));
+        }
+    }
 }

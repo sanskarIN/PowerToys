@@ -158,11 +158,20 @@ public sealed class SizeInfo
     /// <param name="bounds">The size to fit this size into.</param>
     /// <returns>The scaling ratio as a decimal.</returns>
     /// <exception cref="ArgumentException">Thrown if the width or height of the bounds is zero.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the width or height of this size is zero.</exception>
     public decimal ScaleToFitRatio(SizeInfo bounds)
     {
         if (bounds.Width == 0 || bounds.Height == 0)
         {
             throw new ArgumentException($"{nameof(bounds.Width)} or {nameof(bounds.Height)} cannot be zero", nameof(bounds));
+        }
+
+        // the ratios below divide by this instance, not by bounds, so a zero-sized
+        // instance has to be rejected here too - see SizeInfo.Empty
+        if (this.Width == 0 || this.Height == 0)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(this.Width)} or {nameof(this.Height)} cannot be zero");
         }
 
         var widthRatio = bounds.Width / this.Width;
