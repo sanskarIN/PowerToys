@@ -2,7 +2,6 @@
 // The Microsoft Corporation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text.Json.Nodes;
 using Microsoft.PowerToys.UITest.Next;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,7 +18,6 @@ public sealed class KeyboardManagerDialogValidationTests : KeyboardManagerTestBa
 {
     private const int F13 = 0x7C;
     private const int F14 = 0x7D;
-    private const int F15 = 0x7E;
     private const int LeftControl = 0xA2;
 
     private static KeyboardInputFixtureLock? fixtureLock;
