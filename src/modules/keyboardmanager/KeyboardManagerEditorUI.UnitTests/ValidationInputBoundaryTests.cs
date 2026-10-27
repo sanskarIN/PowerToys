@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using KeyboardManagerEditorUI.Helpers;
-using KeyboardManagerEditorUI.Interop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace KeyboardManagerEditorUI.UnitTests
@@ -56,7 +55,6 @@ namespace KeyboardManagerEditorUI.UnitTests
         }
 
         [DataTestMethod]
-        [DataRow(null)]
         [DataRow("")]
         [DataRow(" ")]
         [DataRow("\t")]
@@ -74,7 +72,6 @@ namespace KeyboardManagerEditorUI.UnitTests
         }
 
         [DataTestMethod]
-        [DataRow(null)]
         [DataRow("")]
         [DataRow(" ")]
         [DataRow("\t")]
@@ -151,7 +148,6 @@ namespace KeyboardManagerEditorUI.UnitTests
         }
 
         [DataTestMethod]
-        [DataRow(null)]
         [DataRow("")]
         public void TextMappingReportsEmptyTargetBeforeNativeLookup(string? text)
         {
@@ -200,6 +196,37 @@ namespace KeyboardManagerEditorUI.UnitTests
 
             Assert.AreEqual(ValidationErrorType.EmptyOriginalKeys, urlResult);
             Assert.AreEqual(ValidationErrorType.EmptyOriginalKeys, appResult);
+        }
+
+        [TestMethod]
+        public void NullPayloadsReportFieldSpecificErrorsBeforeLookingAtKeys()
+        {
+            // Null is intentionally passed for both arguments. Validation should
+            // not dereference the native service for malformed dialog input.
+            Assert.AreEqual(
+                ValidationErrorType.EmptyUrl,
+                ValidationHelper.ValidateUrlMapping(
+                    originalKeys: null!,
+                    url: null!,
+                    isAppSpecific: false,
+                    appName: string.Empty,
+                    mappingService: null!));
+            Assert.AreEqual(
+                ValidationErrorType.EmptyProgramPath,
+                ValidationHelper.ValidateAppMapping(
+                    originalKeys: null!,
+                    programPath: null!,
+                    isAppSpecific: false,
+                    appName: string.Empty,
+                    mappingService: null!));
+            Assert.AreEqual(
+                ValidationErrorType.EmptyTargetText,
+                ValidationHelper.ValidateTextMapping(
+                    keys: MakeKeys(1),
+                    textContent: null!,
+                    isAppSpecific: false,
+                    appName: string.Empty,
+                    mappingService: null!));
         }
 
         private static List<string> MakeKeys(int count)
