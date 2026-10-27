@@ -228,11 +228,17 @@ public sealed class KeyboardManagerCrossCategorySelectionTests : KeyboardManager
     {
         Assert.IsTrue(
             editor.WaitFor(
-                () => GlobalShortcuts().Count == expected,
+                () => CurrentActionCount() == expected,
                 timeoutMS: 10_000,
                 pollIntervalMS: 250),
-            $"{reason} Expected {expected} global shortcuts, observed {GlobalShortcuts().Count}. Profile: {ProfileSnapshot()}");
+            $"{reason} Expected {expected} shortcut actions, observed {CurrentActionCount()}. Profile: {ProfileSnapshot()}");
     }
+
+    private static int CurrentActionCount() =>
+        GlobalShortcuts().Count + GlobalTextMappings().Count;
+
+    private static JsonArray GlobalTextMappings() =>
+        KeyboardManagerSettings.ReadProfile()["remapShortcutsToText"]?["global"] as JsonArray ?? new JsonArray();
 
     private static JsonArray GlobalShortcuts() =>
         KeyboardManagerSettings.ReadProfile()["remapShortcuts"]?["global"] as JsonArray ?? new JsonArray();
@@ -240,7 +246,7 @@ public sealed class KeyboardManagerCrossCategorySelectionTests : KeyboardManager
     private static bool ProfileHasShortcut(int modifier, int keyCode)
     {
         string source = $"{modifier};{keyCode}";
-        return GlobalShortcuts().Any(mapping =>
+        return GlobalShortcuts().Concat(GlobalTextMappings()).Any(mapping =>
             mapping?["originalKeys"]?.GetValue<string>() == source);
     }
 
