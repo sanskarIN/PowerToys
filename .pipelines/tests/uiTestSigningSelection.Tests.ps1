@@ -35,10 +35,15 @@ Describe 'UI test signing selection' {
     $authenticatedModules = @(
         'AdvancedPaste-UITests',
         'AdvancedPaste.UITests.Next',
+        'AltWindowCycle.UITests',
         'ColorPicker.UITests',
         'CropAndLock.UITests',
+        'FileLocksmith.UITests',
         'HostsEditor.UITests',
         'Hosts.UITests.Next',
+        'ImageResizer.UITests',
+        'LightSwitch.UITests.Next',
+        'MouseWithoutBorders.UITests',
         'MouseUtils.UITests',
         'MouseUtils.UITests.Next',
         'NewPlus.UITests',
@@ -47,6 +52,8 @@ Describe 'UI test signing selection' {
         'PowerRename.UITests',
         'PowerRename.UITests.Next',
         'RegistryPreview.UITests',
+        'ScreenRuler.UITests.Next',
+        'ShortcutGuide.UITests',
         'Workspaces.UITests.Next',
         'ZoomIt.UITests'
     )
@@ -68,10 +75,16 @@ Describe 'UI test signing selection' {
         'OtherPowerRename.UITests',
         'PowerRename.FuzzingTest',
         'AdvancedPaste.UITests.Next.Extra',
+        'AltWindowCycle.UITests.Extra',
         'FancyZones.UITests.Next',
+        'FileLocksmith.UITests.Extra',
+        'ImageResizer.UITests.Extra',
+        'LightSwitch.UITests.Next.Extra',
+        'MouseWithoutBorders.UITests.Extra',
+        'ScreenRuler.UITests.Next.Extra',
+        'ShortcutGuide.UITests.Extra',
         'Workspaces.Editor.UITests',
-        'ZoomIt.UITests.Extra',
-        'FileLocksmith.UITests' | ForEach-Object { @{ Module = $_ } }
+        'ZoomIt.UITests.Extra' | ForEach-Object { @{ Module = $_ } }
     ) {
         param($Module)
         $result = Get-UITestSigningSelection -Modules $Module
@@ -79,6 +92,33 @@ Describe 'UI test signing selection' {
         $result.RequiresAuthenticatedSettingsIpc | Should Be $false
         ($result.Files -contains 'PowerToys.exe') | Should Be $false
         ($result.Files -contains 'PowerToys.Settings.exe') | Should Be $false
+    }
+
+    It 'signs IPC companions for a ShortcutGuide-only selection on <Platform>' -TestCases @(
+        'x64Win10', 'x64Win11', 'ARM64' | ForEach-Object { @{ Platform = $_ } }
+    ) {
+        param($Platform)
+        $result = Get-UITestSigningSelection -Modules 'ShortcutGuide.UITests' -Platform $Platform
+
+        $result.RequiresAuthenticatedSettingsIpc | Should Be $true
+        ($result.Files -contains 'PowerToys.exe') | Should Be $true
+        ($result.Files -contains 'PowerToys.Settings.exe') | Should Be $true
+        $result.Packages.Count | Should Be 0
+    }
+
+    # Regression: an ImageResizer-only PR selection must not rely on another suite to sign the
+    # Runner/Settings companions, or the Release Runner rejects Settings as not-microsoft-signed.
+    It 'signs IPC companions for an ImageResizer-only selection on <Platform>' -TestCases @(
+        'x64Win10', 'x64Win11', 'ARM64' | ForEach-Object { @{ Platform = $_ } }
+    ) {
+        param($Platform)
+        $result = Get-UITestSigningSelection -Modules 'ImageResizer.UITests' -Platform $Platform
+
+        $result.RequiresNewPlus | Should Be $false
+        $result.RequiresAuthenticatedSettingsIpc | Should Be $true
+        ($result.Files -contains 'PowerToys.exe') | Should Be $true
+        ($result.Files -contains 'PowerToys.Settings.exe') | Should Be $true
+        ($result.Packages -contains 'ImageResizerContextMenuPackage.msix') | Should Be ($Platform -ne 'x64Win10')
     }
 
     It 'uses consistent New+ requirements for <Module> on <Platform>' -TestCases @(
@@ -119,5 +159,16 @@ Describe 'UI test signing selection' {
         $result.RequiresNewPlus | Should Be $true
         $result.RequiresAuthenticatedSettingsIpc | Should Be $true
         ($result.Packages -contains 'NewPlusPackage.msix') | Should Be $true
+    }
+
+    It 'keeps shared signing defaults while allowing an owned payload-specific certificate scope' {
+        $source = Get-Content -LiteralPath (Join-Path $PSScriptRoot '..\signSparsePackages.ps1') -Raw
+        $source | Should Match "\[string\]\`$CertificateFriendlyName = 'PowerToys UI Test Signing'"
+        $source | Should Match '\$testCertificateFriendlyName = \$CertificateFriendlyName'
+        $mwb = Get-Content -LiteralPath (Join-Path $PSScriptRoot '..\mwb\MwbSandboxCi.Common.ps1') -Raw
+        $mwb | Should Match '-CertificateFriendlyName "PowerToys MWB UI Test \$RunId"'
+        $mwb | Should Match "'PowerToys.MouseWithoutBorders.exe'"
+        $mwb | Should Match "'PowerToys.Settings.exe'"
+        $mwb | Should Not Match '(?i)Export-PfxCertificate'
     }
 }
