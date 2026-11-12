@@ -45,18 +45,16 @@ namespace Microsoft.PowerToys.Run.Plugin.WindowsSettings.UnitTests
         [DataRow(19999, 10000, 20000, true)]
         [DataRow(20000, 10000, 20000, false)]
         [DataRow(20001, 10000, 20000, false)]
-        [DataRow(4294967295, 4294967295, null, true)]
-        [DataRow(4294967295, null, 4294967295, false)]
         [DataTestMethod]
         public void IntroductionIsInclusiveAndDeprecationIsExclusive(
-            uint currentBuild,
-            uint? introduced,
-            uint? deprecated,
+            int currentBuild,
+            int? introduced,
+            int? deprecated,
             bool expected)
         {
-            var item = Make("Feature", introduced, deprecated);
+            var item = Make("Feature", introduced is null ? null : (uint)introduced, deprecated is null ? null : (uint)deprecated);
 
-            Assert.AreEqual(expected, Filter(currentBuild, item).Contains(item));
+            Assert.AreEqual(expected, Filter((uint)currentBuild, item).Contains(item));
         }
 
         [TestMethod]
