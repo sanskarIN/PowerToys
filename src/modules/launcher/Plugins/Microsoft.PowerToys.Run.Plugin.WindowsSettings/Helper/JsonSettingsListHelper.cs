@@ -23,8 +23,11 @@ namespace Microsoft.PowerToys.Run.Plugin.WindowsSettings.Helper
         /// </summary>
         private const string _settingsFile = "WindowsSettings.json";
 
+        // JsonSerializerOptions becomes read-only after its first use. Register
+        // converters once, before any deserialization, including concurrent reads.
         private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
         {
+            Converters = { new JsonStringEnumConverter() },
         };
 
         /// <summary>
@@ -47,13 +50,10 @@ namespace Microsoft.PowerToys.Run.Plugin.WindowsSettings.Helper
                     throw new ArgumentNullException(nameof(stream), "stream is null");
                 }
 
-                var options = _serializerOptions;
-                options.Converters.Add(new JsonStringEnumConverter());
-
                 using var reader = new StreamReader(stream);
                 var text = reader.ReadToEnd();
 
-                settings = JsonSerializer.Deserialize<WindowsSettings>(text, options);
+                settings = JsonSerializer.Deserialize<WindowsSettings>(text, _serializerOptions);
             }
             catch (Exception exception)
             {
