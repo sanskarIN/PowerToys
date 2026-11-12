@@ -47,13 +47,26 @@ namespace Microsoft.PowerToys.Run.Plugin.WindowsSettings.Helper
                 ? currentBuild
                 : currentBuildNumber;
 
-            var filteredSettingsList = windowsSettings.Settings.Where(found
-                => (found.DeprecatedInBuild == null || currentWindowsBuild < found.DeprecatedInBuild)
-                && (found.IntroducedInBuild == null || currentWindowsBuild >= found.IntroducedInBuild));
+            FilterByBuildForWindowsBuild(windowsSettings, currentWindowsBuild);
+        }
 
-            filteredSettingsList = filteredSettingsList.OrderBy(found => found.Name);
+        /// <summary>
+        /// Filters the catalog for an explicitly supplied Windows build. Keeping the
+        /// predicate separate from registry detection makes build boundaries testable.
+        /// </summary>
+        /// <param name="windowsSettings">The settings catalog to update.</param>
+        /// <param name="currentWindowsBuild">The Windows build to evaluate.</param>
+        internal static void FilterByBuildForWindowsBuild(in WindowsSettings windowsSettings, uint currentWindowsBuild)
+        {
+            if (windowsSettings?.Settings is null)
+            {
+                return;
+            }
 
-            windowsSettings.Settings = filteredSettingsList;
+            windowsSettings.Settings = windowsSettings.Settings
+                .Where(found => (found.DeprecatedInBuild == null || currentWindowsBuild < found.DeprecatedInBuild)
+                    && (found.IntroducedInBuild == null || currentWindowsBuild >= found.IntroducedInBuild))
+                .OrderBy(found => found.Name);
         }
 
         /// <summary>
