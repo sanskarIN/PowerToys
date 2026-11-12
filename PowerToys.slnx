@@ -1001,6 +1001,10 @@
       <Platform Solution="*|ARM64" Project="ARM64" />
       <Platform Solution="*|x64" Project="x64" />
     </Project>
+    <Project Path="src/modules/launcher/Plugins/Microsoft.PowerToys.Run.Plugin.WindowsSettings.UnitTests/Microsoft.PowerToys.Run.Plugin.WindowsSettings.UnitTests.csproj">
+      <Platform Solution="*|ARM64" Project="ARM64" />
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
     <Project Path="src/modules/launcher/Plugins/Microsoft.PowerToys.Run.Plugin.WindowsTerminal.UnitTests/Microsoft.Plugin.WindowsTerminal.UnitTests.csproj">
       <Platform Solution="*|ARM64" Project="ARM64" />
       <Platform Solution="*|x64" Project="x64" />
