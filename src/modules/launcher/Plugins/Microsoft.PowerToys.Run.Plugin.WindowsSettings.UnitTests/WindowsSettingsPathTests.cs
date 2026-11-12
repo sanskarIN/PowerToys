@@ -202,8 +202,8 @@ namespace Microsoft.PowerToys.Run.Plugin.WindowsSettings.UnitTests
             Assert.AreSame(areas, entry.Areas);
             Assert.AreEqual(2, entry.AltNames.Count());
             Assert.AreEqual("Additional details", entry.Note);
-            Assert.AreEqual((uint)22000, entry.IntroducedInBuild);
-            Assert.AreEqual((uint)33000, entry.DeprecatedInBuild);
+            Assert.AreEqual((uint?)22000, entry.IntroducedInBuild);
+            Assert.AreEqual((uint?)33000, entry.DeprecatedInBuild);
             Assert.IsTrue(entry.ShowAsFirstResult);
         }
 
