@@ -73,7 +73,8 @@ namespace PowerLauncher
 
         public void ReadSettings()
         {
-            _readSyncObject.Enter();
+            // The lock must be released even if a plugin or settings update throws.
+            using var readScope = _readSyncObject.EnterScope();
             var retry = true;
             var retryCount = 0;
             while (retry)
@@ -224,7 +225,6 @@ namespace PowerLauncher
                 }
             }
 
-            _readSyncObject.Exit();
         }
 
         public void SetRefreshPluginsOverviewCallback(Action callback)
