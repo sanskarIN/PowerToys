@@ -160,7 +160,7 @@ namespace Microsoft.PowerToys.Run.Plugin.WindowsSettings.UnitTests
             var result = Render("display", setting).Single();
 
             Assert.AreEqual(setting.JoinedFullSettingsPath, result.SubTitle);
-            StringAssert.Contains(result.ToolTipData.Text, setting.Note);
+            StringAssert.Contains(result.ToolTipData.Text, setting.Note!);
         }
 
         [TestMethod]
